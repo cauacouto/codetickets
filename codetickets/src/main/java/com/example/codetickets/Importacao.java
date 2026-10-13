@@ -19,7 +19,8 @@ public class Importacao {
     private LocalDate data;
     private String tipoIngresso;
     private Double valor;
-    private LocalDateTime horarioImportacao;
+    private Double taxaAdm;
+    private LocalDateTime HoraImportacao;
 
 
     public Long getId() {
@@ -86,11 +87,19 @@ public class Importacao {
         this.valor = valor;
     }
 
-    public LocalDateTime getHorarioImportacao() {
-        return horarioImportacao;
+    public LocalDateTime getHoraImportacao() {
+        return HoraImportacao;
     }
 
-    public void setHorarioImportacao(LocalDateTime horarioImportacao) {
-        this.horarioImportacao = horarioImportacao;
+    public void setHoraImportacao(LocalDateTime HoraImportacao) {
+        this.HoraImportacao = HoraImportacao;
+    }
+
+    public Double getTaxaAdm() {
+        return taxaAdm;
+    }
+
+    public void setTaxaAdm(Double taxaAdm) {
+        this.taxaAdm = taxaAdm;
     }
 }
