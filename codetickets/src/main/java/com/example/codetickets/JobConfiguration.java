@@ -9,7 +9,6 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.infrastructure.item.ItemReader;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.infrastructure.item.database.BeanPropertyItemSqlParameterSourceProvider;
-import org.springframework.batch.infrastructure.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.infrastructure.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.time.LocalDateTime;
 
 @Configuration
 public class JobConfiguration {
@@ -41,6 +39,7 @@ public class JobConfiguration {
                .<Importacao,Importacao>chunk(200)
                .transactionManager(transactionManager)
                .reader(reader)
+               .processor(processor())
                .writer(writer)
                .build();
     }
@@ -54,21 +53,27 @@ public class JobConfiguration {
                .delimited()
                .delimiter(";")
                .names("cpf","cliente","nascimento","evento","data","tipoIngresso","valor")
-               .targetType(Importacao.class)
+               .fieldSetMapper(new ImportacaoMapper())
                .build();
 
    }
 
-   @Bean
-   public ItemWriter<Importacao> writer (DataSource dataSource){
-       return new JdbcBatchItemWriterBuilder<Importacao>()
-               .dataSource(dataSource)
-               .sql(
-                       "INSERT INTP importacao (id, cpf,cliente,evento,data,tipo_ingresso,valor,horario_importacao) VALUES" +
-                       "(:id, :cpf, :cliente, : evento, :data, :tipo_ingresso, :valor, " + LocalDateTime.now() + ")"
-               )
-               .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-               .build();
+    @Bean
+    public ItemWriter<Importacao> writer(DataSource dataSource) {
+        return new JdbcBatchItemWriterBuilder<Importacao>()
+                .dataSource(dataSource)
+                .sql(
+                        "INSERT INTO importacao (cpf, cliente, nascimento, evento, data, tipo_ingresso, valor, hora_importacao,taxa_adm) VALUES" +
+                                " (:cpf, :cliente, :nascimento, :evento, :data, :tipoIngresso, :valor, :horaImportacao, :taxaAdm)"
 
+                )
+                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
+                .build();
+    }
+
+    @Bean
+    public ImportacaoProcessor processor(){
+       return new ImportacaoProcessor();
+    }
    }
-}
+
